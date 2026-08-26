@@ -1,0 +1,1217 @@
+/* ================================
+   GLOBAL
+================================ */
+
+.dashboard {
+  min-height: 100vh;
+  width: 100%;
+  color: #e8eefc;
+  background:
+    radial-gradient(
+      circle at 85% 0%,
+      rgba(59, 130, 246, 0.12),
+      transparent 30%
+    ),
+    #080d19;
+}
+
+
+/* ================================
+   HEADER
+================================ */
+
+.header {
+  width: 100%;
+  min-height: 88px;
+  padding: 22px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #0d1424;
+  border-bottom: 1px solid #202c43;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #f4f7ff;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: #91a0bb;
+  font-size: 14px;
+}
+
+.live-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 7px 12px;
+  border-radius: 999px;
+
+  color: #55e49a;
+  background: rgba(53, 208, 127, 0.08);
+  border: 1px solid rgba(53, 208, 127, 0.2);
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #35d07f;
+  box-shadow: 0 0 10px rgba(53, 208, 127, 0.7);
+}
+
+
+/* ================================
+   MAIN
+================================ */
+
+main {
+  width: min(1200px, 92%);
+  margin: 32px auto 50px;
+}
+
+
+/* ================================
+   COMMON CARD
+================================ */
+
+.map-section,
+.train-card,
+.eta-card,
+.risk-section,
+.why-section,
+.timeline-section,
+.passenger-section,
+.what-if-section {
+  background: #111a2c;
+  border: 1px solid #26344e;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+}
+
+.map-section,
+.risk-section,
+.why-section,
+.timeline-section,
+.passenger-section,
+.what-if-section {
+  padding: 26px;
+}
+
+section {
+  margin-bottom: 24px;
+}
+
+.card-label {
+  margin-bottom: 7px;
+
+  color: #6f8fc7;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+section h2 {
+  margin: 0 0 18px;
+
+  color: #f1f5ff;
+  font-size: 22px;
+  font-weight: 750;
+}
+
+
+/* ================================
+   MAP
+================================ */
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.map-status {
+  color: #55e49a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.railway-map {
+  position: relative;
+
+  height: 300px;
+  margin-top: 8px;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+  border: 1px solid #2a3955;
+
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    #0c1526;
+
+  background-size: 35px 35px;
+}
+
+.route-line {
+  position: absolute;
+
+  left: 12%;
+  right: 12%;
+  top: 50%;
+
+  height: 5px;
+
+  transform: translateY(-50%);
+
+  border-radius: 999px;
+
+  background: #405779;
+  box-shadow: 0 0 10px rgba(76, 141, 255, 0.12);
+}
+
+.station {
+  position: absolute;
+  top: 50%;
+
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+
+  transform: translateY(-50%);
+
+  color: #f1f5ff;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.station-one {
+  left: 12%;
+}
+
+.station-two {
+  left: 50%;
+}
+
+.station-three {
+  right: 12%;
+}
+
+.station-dot {
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  background: #111a2c;
+  border: 4px solid #8da0bf;
+
+  box-shadow: 0 0 0 5px rgba(141, 160, 191, 0.08);
+}
+
+.station-dot.current {
+  border-color: #4c8dff;
+  background: #4c8dff;
+  box-shadow:
+    0 0 0 5px rgba(76, 141, 255, 0.14),
+    0 0 18px rgba(76, 141, 255, 0.5);
+}
+
+.train-marker {
+  position: absolute;
+  top: -58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: #162441;
+  border: 1px solid #3d70bd;
+
+  font-size: 22px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ================================
+   TRAIN + ETA
+================================ */
+
+.train-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.train-card,
+.eta-card {
+  padding: 26px;
+}
+
+.train-card h2 {
+  margin: 8px 0 5px;
+
+  color: #f4f7ff;
+  font-size: 26px;
+}
+
+.route {
+  margin: 0;
+
+  color: #8e9db8;
+  font-size: 14px;
+}
+
+.train-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  margin-top: 28px;
+}
+
+.train-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.train-details span {
+  color: #7888a4;
+  font-size: 12px;
+}
+
+.train-details strong {
+  color: #e9effc;
+  font-size: 15px;
+}
+
+.train-details .delay {
+  color: #ff9b73;
+}
+
+
+/* ================================
+   ETA
+================================ */
+
+.eta-time {
+  margin: 10px 0;
+
+  color: #f4f7ff;
+  font-size: 54px;
+  line-height: 1;
+  font-weight: 850;
+}
+
+.eta-range {
+  margin: 0;
+
+  color: #8796b1;
+  font-size: 14px;
+}
+
+.eta-range strong {
+  color: #dbe5f8;
+}
+
+.confidence {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 28px;
+}
+
+.confidence span {
+  color: #7888a4;
+  font-size: 12px;
+}
+
+.confidence strong {
+  color: #69a1ff;
+  font-size: 14px;
+}
+
+.confidence-bar,
+.factor-bar {
+  width: 100%;
+  height: 8px;
+
+  margin-top: 9px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+  background: #273650;
+}
+
+.confidence-fill,
+.factor-fill {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #4c8dff;
+
+  transition: width 0.4s ease;
+}
+
+
+/* ================================
+   DELAY RISK
+================================ */
+
+.risk-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.risk-value {
+  margin-top: 5px;
+
+  color: #ffb45c;
+  font-size: 48px;
+  line-height: 1;
+  font-weight: 850;
+}
+
+.risk-status {
+  margin: 8px 0 0;
+
+  color: #ffb45c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.risk-info {
+  max-width: 460px;
+
+  color: #8998b2;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+
+/* ================================
+   WHY ETA
+================================ */
+
+.explanation {
+  max-width: 800px;
+
+  margin: 0 0 25px;
+
+  color: #96a5c0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.factor {
+  margin: 18px 0;
+}
+
+.factor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #dce5f6;
+  font-size: 13px;
+}
+
+.factor-header strong {
+  color: #78a8ff;
+}
+
+
+/* ================================
+   TIMELINE
+================================ */
+
+.timeline {
+  margin-top: 22px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+
+  min-height: 70px;
+
+  margin-left: 9px;
+  padding: 0 0 20px 20px;
+
+  border-left: 2px solid #2d3c58;
+}
+
+.timeline-item:last-child {
+  border-left-color: transparent;
+}
+
+.timeline-dot {
+  width: 21px;
+  height: 21px;
+
+  flex-shrink: 0;
+
+  margin-left: -31px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #2d3c58;
+  color: #8fa0bd;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: #35d07f;
+  color: #07150d;
+}
+
+.timeline-item.current .timeline-dot {
+  background: #4c8dff;
+  color: white;
+
+  box-shadow: 0 0 12px rgba(76, 141, 255, 0.45);
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.timeline-content strong {
+  color: #e8effd;
+  font-size: 14px;
+}
+
+.timeline-content span {
+  color: #7f8fa9;
+  font-size: 12px;
+}
+
+
+/* ================================
+   PASSENGER REPORTS
+================================ */
+
+.passenger-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.passenger-report {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid #25344f;
+  border-radius: 12px;
+
+  background: #0d1729;
+}
+
+.report-icon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #17243c;
+
+  font-size: 19px;
+}
+
+.report-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.report-content strong {
+  color: #e7eefc;
+  font-size: 14px;
+}
+
+.report-content p {
+  margin: 0;
+
+  color: #8d9db8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.report-content span {
+  color: #667895;
+  font-size: 11px;
+}
+
+
+/* ================================
+   WHAT-IF
+================================ */
+
+.what-if-section > p {
+  color: #8998b2;
+  font-size: 14px;
+}
+
+.simulation-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+
+  margin: 24px 0;
+}
+
+.simulation-option {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.simulation-option label {
+  color: #9ba9c0;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.simulation-option select {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 1px solid #2d3d5a;
+  border-radius: 9px;
+
+  background: #0c1526;
+  color: #e5ecfa;
+
+  font: inherit;
+
+  outline: none;
+}
+
+.simulation-option select:focus {
+  border-color: #4c8dff;
+}
+
+.simulate-button {
+  padding: 12px 20px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: #4c8dff;
+  color: white;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.simulate-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+
+/* ================================
+   FOOTER
+================================ */
+
+.footer {
+  padding: 25px;
+
+  border-top: 1px solid #1e2b42;
+
+  color: #65748f;
+
+  text-align: center;
+  font-size: 12px;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 800px) {
+
+  .header {
+    padding: 20px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .header p {
+    font-size: 12px;
+  }
+
+  main {
+    width: 94%;
+    margin-top: 22px;
+  }
+
+  .train-section {
+    grid-template-columns: 1fr;
+  }
+
+  .train-details {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .simulation-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .railway-map {
+    height: 250px;
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .live-status {
+    align-self: flex-start;
+  }
+
+  .map-section,
+  .train-card,
+  .eta-card,
+  .risk-section,
+  .why-section,
+  .timeline-section,
+  .passenger-section,
+  .what-if-section {
+    padding: 20px;
+  }
+
+  .eta-time {
+    font-size: 42px;
+  }
+
+  .railway-map {
+    height: 220px;
+  }
+
+  .station {
+    font-size: 12px;
+  }
+
+  .train-marker {
+    font-size: 18px;
+  }
+}
+/* ================================
+   SIMULATION RESULT
+================================ */
+
+.simulation-result {
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid #2c4265;
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(76, 141, 255, 0.08),
+      rgba(17, 26, 44, 0.4)
+    ),
+    #0d1729;
+  animation: simulationAppear 0.35s ease;
+}
+
+.simulation-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.simulation-result-header h3 {
+  margin: 0;
+  color: #edf3ff;
+  font-size: 18px;
+}
+
+.simulation-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #72a8ff;
+  background: rgba(76, 141, 255, 0.1);
+  border: 1px solid rgba(76, 141, 255, 0.25);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.simulation-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.simulation-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px;
+  border: 1px solid #253753;
+  border-radius: 11px;
+  background: #101c30;
+}
+
+.simulation-result-card span {
+  color: #7f90ac;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.simulation-result-card strong {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.simulated-eta {
+  color: #f2f6ff;
+}
+
+.simulated-delay {
+  color: #ff9b73;
+}
+
+.simulated-risk {
+  color: #ffb45c;
+}
+
+.simulation-result-card small {
+  margin-top: 1px;
+  color: #ffb45c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.simulation-explanation {
+  margin: 18px 0 0;
+  padding-top: 17px;
+  border-top: 1px solid #25344e;
+  color: #8d9db8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.simulation-explanation strong {
+  color: #dce7fa;
+}
+
+@keyframes simulationAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 800px) {
+  .simulation-result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ================================
+   POLISHED RAILWAY MAP
+================================ */
+
+.railway-map {
+  position: relative;
+  height: 300px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #2a3955;
+
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(76, 141, 255, 0.08),
+      transparent 42%
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    #0c1526;
+
+  background-size:
+    auto,
+    35px 35px,
+    35px 35px,
+    auto;
+}
+
+/* Main railway track */
+
+.track-base {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 7px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+
+  background: #344967;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 14px rgba(76, 141, 255, 0.12);
+}
+
+/* Active route */
+
+.track-glow {
+  position: absolute;
+  left: 10%;
+  width: 40%;
+  top: 50%;
+  height: 7px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+
+  background: #4c8dff;
+
+  box-shadow:
+    0 0 12px rgba(76, 141, 255, 0.65),
+    0 0 25px rgba(76, 141, 255, 0.2);
+}
+
+/* Station positioning */
+
+.station {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  transform: translateY(-50%);
+}
+
+.station-one {
+  left: 10%;
+}
+
+.station-two {
+  left: 50%;
+}
+
+.station-three {
+  right: 10%;
+}
+
+/* Station node */
+
+.station-node {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #111a2c;
+
+  border: 3px solid #7183a1;
+
+  box-shadow:
+    0 0 0 5px rgba(113, 131, 161, 0.08);
+}
+
+.station-node span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7183a1;
+}
+
+/* Completed station */
+
+.station-node.completed {
+  border-color: #35d07f;
+  box-shadow:
+    0 0 0 5px rgba(53, 208, 127, 0.1),
+    0 0 14px rgba(53, 208, 127, 0.25);
+}
+
+.station-node.completed span {
+  background: #35d07f;
+}
+
+/* Current station */
+
+.station-node.current {
+  border-color: #4c8dff;
+  background: #4c8dff;
+
+  box-shadow:
+    0 0 0 6px rgba(76, 141, 255, 0.12),
+    0 0 20px rgba(76, 141, 255, 0.55);
+}
+
+.station-node.current span {
+  background: white;
+}
+
+/* Upcoming station */
+
+.station-node.upcoming {
+  border-color: #7183a1;
+}
+
+.station-node.upcoming span {
+  background: #7183a1;
+}
+
+/* Station text */
+
+.station-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  margin-top: 12px;
+  white-space: nowrap;
+}
+
+.station-info strong {
+  color: #edf3ff;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.station-info span {
+  color: #71829f;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Train */
+
+.train-position {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  z-index: 8;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  transform: translate(-50%, -50%);
+}
+
+.train-marker {
+  position: relative;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #172744;
+  border: 1px solid #4c8dff;
+
+  font-size: 23px;
+
+  box-shadow:
+    0 0 0 6px rgba(76, 141, 255, 0.08),
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(76, 141, 255, 0.3);
+
+  animation: trainPulse 2s ease-in-out infinite;
+}
+
+.train-label {
+  margin-top: 8px;
+
+  padding: 4px 8px;
+
+  border-radius: 5px;
+
+  background: rgba(8, 13, 25, 0.85);
+  border: 1px solid #263b5c;
+
+  color: #9fbfff;
+
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.5px;
+
+  white-space: nowrap;
+}
+
+/* Live tracking indicator */
+
+.map-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #55e49a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tracking-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #35d07f;
+
+  box-shadow:
+    0 0 8px rgba(53, 208, 127, 0.7);
+
+  animation: trackingPulse 1.8s ease-in-out infinite;
+}
+
+/* Animations */
+
+@keyframes trainPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 6px rgba(76, 141, 255, 0.08),
+      0 8px 25px rgba(0, 0, 0, 0.35),
+      0 0 20px rgba(76, 141, 255, 0.3);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 10px rgba(76, 141, 255, 0.04),
+      0 8px 25px rgba(0, 0, 0, 0.35),
+      0 0 30px rgba(76, 141, 255, 0.5);
+  }
+}
+
+@keyframes trackingPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+  .railway-map {
+    height: 220px;
+  }
+
+  .station-info strong {
+    font-size: 12px;
+  }
+
+  .station-info span {
+    font-size: 9px;
+  }
+
+  .train-marker {
+    width: 40px;
+    height: 40px;
+    font-size: 19px;
+  }
+
+  .train-label {
+    font-size: 8px;
+  }
+}
