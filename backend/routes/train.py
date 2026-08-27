@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 from models import TrainStatus, ETAResponse, TimelineResponse
+from services.ml_service import get_eta_prediction
 
 router = APIRouter(prefix="/train", tags=["train"])
+
 
 @router.get("/{train_id}", response_model=TrainStatus)
 def get_train(train_id: str):
@@ -13,16 +15,28 @@ def get_train(train_id: str):
         "status": "running"
     }
 
+
 @router.get("/{train_id}/eta", response_model=ETAResponse)
 def get_eta(train_id: str):
+    # TODO: replace these hardcoded values with real simulation
+    # data from Ashwika's get_train_state() once it's wired in
+    prediction = get_eta_prediction(
+        speed=65,
+        delay=9,
+        distance_remaining=40,
+        dwell_time=3,
+        congestion=0.5,
+    )
+
     return {
         "train_id": train_id,
-        "eta": "18:47",
-        "eta_min": "18:44",
-        "eta_max": "18:51",
-        "confidence": 91,
-        "delay_risk": 68
+        "eta": prediction["eta"],
+        "eta_min": prediction["eta_min"],
+        "eta_max": prediction["eta_max"],
+        "confidence": prediction["confidence"],
+        "delay_risk": prediction["delay_risk"],
     }
+
 
 @router.get("/{train_id}/timeline", response_model=TimelineResponse)
 def get_timeline(train_id: str):
