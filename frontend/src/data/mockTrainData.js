@@ -1,15 +1,17 @@
 const mockTrainData = {
   trainId: "12876",
+
   route: {
     from: "Delhi",
     current: "Kanpur",
     destination: "Lucknow",
   },
 
-  speed: 75,
-  delay: 6,
+  speed: 62,
+  delay: 9,
 
   eta: "18:47",
+
   etaRange: {
     min: "18:44",
     max: "18:51",
@@ -22,12 +24,12 @@ const mockTrainData = {
     {
       station: "Delhi",
       status: "completed",
-      information: "Departure — 14:20",
+      information: "Departure — 17:52",
     },
     {
       station: "Kanpur",
       status: "current",
-      information: "Current location — +6 min delay",
+      information: "Current location — +9 min delay",
     },
     {
       station: "Lucknow",

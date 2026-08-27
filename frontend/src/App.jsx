@@ -1,11 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import mockTrainData from "./data/mockTrainData";
+import {
+  getTrain,
+  getETA,
+  getTimeline,
+  getReports,
+} from "./api/api.js";
 import "./App.css";
 
 function App() {
+  const [trainData, setTrainData] = useState(mockTrainData);
+  const [etaData, setEtaData] = useState(null);
+  const [timelineData, setTimelineData] = useState(null);
+  const [reportsData, setReportsData] = useState(null);
+
+  const [backendConnected, setBackendConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [additionalDelay, setAdditionalDelay] = useState("0");
   const [congestion, setCongestion] = useState("medium");
   const [simulation, setSimulation] = useState(null);
+
+  const TRAIN_ID = "12876";
+
+  // =========================
+  // LOAD BACKEND DATA
+  // =========================
+
+  const loadBackendData = async () => {
+    try {
+      const [train, eta, timeline, reports] = await Promise.all([
+        getTrain(TRAIN_ID),
+        getETA(TRAIN_ID),
+        getTimeline(TRAIN_ID),
+        getReports(TRAIN_ID),
+      ]);
+
+      setTrainData(train);
+      setEtaData(eta);
+      setTimelineData(timeline);
+      setReportsData(reports);
+
+      setBackendConnected(true);
+      setLoading(false);
+    } catch (error) {
+      console.error("Backend connection failed:", error);
+
+      setBackendConnected(false);
+      setLoading(false);
+    }
+  };
+
+  // Initial load + polling
+  useEffect(() => {
+    loadBackendData();
+
+    const interval = setInterval(() => {
+      loadBackendData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // =========================
+  // WHAT-IF SIMULATION
+  // =========================
 
   const runSimulation = () => {
     const delay = Number(additionalDelay);
@@ -22,35 +81,47 @@ function App() {
       high: 18,
     };
 
+    const baseDelay =
+      etaData?.delay_risk !== undefined
+        ? Math.round(etaData.delay_risk / 10)
+        : mockTrainData.delay;
+
     const totalAdditionalDelay =
       delay + congestionImpact[congestion];
 
     const simulatedDelay = Math.max(
       0,
-      mockTrainData.delay + totalAdditionalDelay
+      baseDelay + totalAdditionalDelay
     );
 
-    const [hours, minutes] = mockTrainData.eta
-      .split(":")
-      .map(Number);
+    const baseEta = etaData?.eta || mockTrainData.eta;
+
+    const [hours, minutes] = baseEta.split(":").map(Number);
 
     const baseMinutes = hours * 60 + minutes;
 
     const simulatedMinutes =
       baseMinutes + totalAdditionalDelay;
 
-    const finalHours = Math.floor(simulatedMinutes / 60) % 24;
-    const finalMinutes = simulatedMinutes % 60;
+    const finalHours =
+      Math.floor(simulatedMinutes / 60) % 24;
 
-    const simulatedEta = `${String(finalHours).padStart(2, "0")}:${String(
-      finalMinutes
-    ).padStart(2, "0")}`;
+    const finalMinutes =
+      simulatedMinutes % 60;
+
+    const simulatedEta =
+      `${String(finalHours).padStart(2, "0")}:${String(
+        finalMinutes
+      ).padStart(2, "0")}`;
+
+    const baseRisk =
+      etaData?.delay_risk ?? mockTrainData.delayRisk;
 
     const simulatedRisk = Math.min(
       99,
       Math.max(
         5,
-        mockTrainData.delayRisk +
+        baseRisk +
           delay * 1.5 +
           congestionRisk[congestion]
       )
@@ -72,105 +143,171 @@ function App() {
     });
   };
 
+  // =========================
+  // NORMALIZE BACKEND DATA
+  // =========================
+
+  const currentStation =
+    trainData?.current_station ||
+    trainData?.route?.current ||
+    mockTrainData.route.current;
+
+  const nextStation =
+    trainData?.next_station ||
+    "Station C";
+
+  const currentDelay =
+    trainData?.delay_min ??
+    trainData?.delay ??
+    mockTrainData.delay;
+
+  const trainStatus =
+    trainData?.status ||
+    "running";
+
+  const speed =
+    trainData?.speed ??
+    mockTrainData.speed;
+
+  const currentEta =
+    etaData?.eta ||
+    mockTrainData.eta;
+
+  const etaMin =
+    etaData?.eta_min ||
+    mockTrainData.etaRange.min;
+
+  const etaMax =
+    etaData?.eta_max ||
+    mockTrainData.etaRange.max;
+
+  const confidence =
+    etaData?.confidence ??
+    mockTrainData.confidence;
+
+  const delayRisk =
+    etaData?.delay_risk ??
+    mockTrainData.delayRisk;
+
+  const timeline =
+    timelineData?.timeline ||
+    mockTrainData.timeline;
+
+  const reports =
+    reportsData?.reports ||
+    mockTrainData.passengerReports;
+
   return (
     <div className="dashboard">
 
-      {/* Header */}
+      {/* HEADER */}
+
       <header className="header">
+
         <div>
           <h1>🚆 ETA Intelligence</h1>
-          <p>Dynamic Railway Monitoring System</p>
+
+          <p>
+            Dynamic Railway Monitoring System
+          </p>
         </div>
 
         <div className="live-status">
+
           <span className="live-dot"></span>
-          LIVE
+
+          {backendConnected
+            ? "LIVE"
+            : "BACKEND OFFLINE"}
+
         </div>
+
       </header>
 
       <main>
 
-        {/* Railway Map */}
-       {/* Railway Map */}
-<section className="map-section">
+        {/* BACKEND STATUS */}
 
-  <div className="section-heading">
-    <div>
-      <div className="card-label">LIVE NETWORK</div>
-      <h2>Railway Map</h2>
-    </div>
+        {!backendConnected && (
+          <div
+            style={{
+              padding: "10px 16px",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              background: "rgba(255, 165, 0, 0.12)",
+              border: "1px solid rgba(255, 165, 0, 0.3)",
+            }}
+          >
+            ⚠️ Backend unavailable — showing available data.
+          </div>
+        )}
 
-    <div className="map-status">
-      <span className="tracking-dot"></span>
-      Live tracking
-    </div>
-  </div>
+        {/* RAILWAY MAP */}
 
-  <div className="railway-map">
+        <section className="map-section">
 
-    {/* Track */}
-    <div className="track-base"></div>
-    <div className="track-glow"></div>
+          <div className="section-heading">
 
-    {/* Moving train */}
-    <div className="train-position">
-      <div className="train-marker">
-        🚆
-      </div>
-      <span className="train-label">
-        Train {mockTrainData.trainId}
-      </span>
-    </div>
+            <div>
 
-    {/* Delhi */}
-    <div className="station station-one">
+              <div className="card-label">
+                LIVE NETWORK
+              </div>
 
-      <div className="station-node completed">
-        <span></span>
-      </div>
+              <h2>Railway Map</h2>
 
-      <div className="station-info">
-        <strong>Delhi</strong>
-        <span>Departed</span>
-      </div>
+            </div>
 
-    </div>
+            <div className="map-status">
+              ● Live tracking
+            </div>
 
-    {/* Kanpur */}
-    <div className="station station-two">
+          </div>
 
-      <div className="station-node current">
-        <span></span>
-      </div>
+          <div className="railway-map">
 
-      <div className="station-info">
-        <strong>Kanpur</strong>
-        <span>Current location</span>
-      </div>
+            <div className="route-line"></div>
 
-    </div>
+            <div className="station station-one">
 
-    {/* Lucknow */}
-    <div className="station station-three">
+              <div className="station-dot"></div>
 
-      <div className="station-node upcoming">
-        <span></span>
-      </div>
+              <span>Delhi</span>
 
-      <div className="station-info">
-        <strong>Lucknow</strong>
-        <span>Upcoming</span>
-      </div>
+            </div>
 
-    </div>
+            <div className="station station-two">
 
-  </div>
+              <div className="station-dot current"></div>
 
-</section>
-        {/* Train + ETA */}
+              <div className="train-marker">
+                🚆
+              </div>
+
+              <span>
+                {currentStation}
+              </span>
+
+            </div>
+
+            <div className="station station-three">
+
+              <div className="station-dot"></div>
+
+              <span>Lucknow</span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* TRAIN + ETA */}
+
         <section className="train-section">
 
-          {/* Train Card */}
+          {/* TRAIN CARD */}
+
           <div className="train-card">
 
             <div className="card-label">
@@ -178,7 +315,9 @@ function App() {
             </div>
 
             <h2>
-              Train {mockTrainData.trainId}
+              Train{" "}
+              {trainData?.train_id ||
+                mockTrainData.trainId}
             </h2>
 
             <p className="route">
@@ -190,34 +329,57 @@ function App() {
             <div className="train-details">
 
               <div>
-                <span>Current Station</span>
+
+                <span>
+                  Current Station
+                </span>
 
                 <strong>
-                  {mockTrainData.route.current}
+                  {currentStation}
                 </strong>
+
               </div>
 
               <div>
-                <span>Speed</span>
+
+                <span>
+                  Speed
+                </span>
 
                 <strong>
-                  {mockTrainData.speed} km/h
+                  {speed} km/h
                 </strong>
+
               </div>
 
               <div>
-                <span>Delay</span>
+
+                <span>
+                  Delay
+                </span>
 
                 <strong className="delay">
-                  +{mockTrainData.delay} min
+                  +{currentDelay} min
                 </strong>
+
               </div>
 
             </div>
 
+            <div
+              style={{
+                marginTop: "12px",
+                fontSize: "13px",
+                opacity: 0.7,
+              }}
+            >
+              Status: {trainStatus} · Next: {nextStation}
+            </div>
+
           </div>
 
-          {/* ETA Card */}
+          {/* ETA CARD */}
+
           <div className="eta-card">
 
             <div className="card-label">
@@ -225,16 +387,19 @@ function App() {
             </div>
 
             <div className="eta-time">
-              {mockTrainData.eta}
+              {currentEta}
             </div>
 
             <p className="eta-range">
+
               Expected range:{" "}
+
               <strong>
-                {mockTrainData.etaRange.min}
+                {etaMin}
                 {" – "}
-                {mockTrainData.etaRange.max}
+                {etaMax}
               </strong>
+
             </p>
 
             <div className="confidence">
@@ -244,28 +409,32 @@ function App() {
               </span>
 
               <strong>
-                {mockTrainData.confidence}%
+                {confidence}%
               </strong>
 
             </div>
 
             <div className="confidence-bar">
+
               <div
                 className="confidence-fill"
                 style={{
-                  width: `${mockTrainData.confidence}%`,
+                  width: `${confidence}%`,
                 }}
               ></div>
+
             </div>
 
           </div>
 
         </section>
 
-        {/* Delay Risk */}
+        {/* DELAY RISK */}
+
         <section className="risk-section">
 
           <div>
+
             <div className="card-label">
               DELAY FORECAST
             </div>
@@ -275,12 +444,19 @@ function App() {
             </h2>
 
             <div className="risk-value">
-              {mockTrainData.delayRisk}%
+              {delayRisk}%
             </div>
 
             <p className="risk-status">
-              Medium Risk
+
+              {delayRisk >= 70
+                ? "High Risk"
+                : delayRisk >= 40
+                ? "Medium Risk"
+                : "Low Risk"}
+
             </p>
+
           </div>
 
           <div className="risk-info">
@@ -294,7 +470,8 @@ function App() {
 
         </section>
 
-        {/* Why ETA Changed */}
+        {/* WHY ETA CHANGED */}
+
         <section className="why-section">
 
           <div className="card-label">
@@ -306,53 +483,59 @@ function App() {
           </h2>
 
           <p className="explanation">
-            The predicted arrival time increased because
-            the train is currently experiencing operational
-            delay and congestion near{" "}
-            {mockTrainData.route.current}.
+
+            The predicted arrival time is calculated
+            using current train conditions, operational
+            delay, congestion and journey information
+            near {currentStation}.
+
           </p>
 
           <div className="factor-list">
 
-            {mockTrainData.etaFactors.map((factor) => (
+            {mockTrainData.etaFactors.map(
+              (factor) => (
 
-              <div
-                className="factor"
-                key={factor.name}
-              >
+                <div
+                  className="factor"
+                  key={factor.name}
+                >
 
-                <div className="factor-header">
+                  <div className="factor-header">
 
-                  <span>
-                    {factor.name}
-                  </span>
+                    <span>
+                      {factor.name}
+                    </span>
 
-                  <strong>
-                    {factor.percentage}%
-                  </strong>
+                    <strong>
+                      {factor.percentage}%
+                    </strong>
+
+                  </div>
+
+                  <div className="factor-bar">
+
+                    <div
+                      className="factor-fill"
+                      style={{
+                        width:
+                          `${factor.percentage}%`,
+                      }}
+                    ></div>
+
+                  </div>
 
                 </div>
 
-                <div className="factor-bar">
-
-                  <div
-                    className="factor-fill"
-                    style={{
-                      width: `${factor.percentage}%`,
-                    }}
-                  ></div>
-
-                </div>
-
-              </div>
-
-            ))}
+              )
+            )}
 
           </div>
 
         </section>
 
-        {/* Journey Timeline */}
+        {/* TIMELINE */}
+
         <section className="timeline-section">
 
           <div className="card-label">
@@ -365,16 +548,23 @@ function App() {
 
           <div className="timeline">
 
-            {mockTrainData.timeline.map((item) => (
+            {timeline.map((item, index) => (
 
               <div
-                className={`timeline-item ${item.status}`}
-                key={item.station}
+                className={`timeline-item ${
+                  item.status ||
+                  "future"
+                }`}
+                key={
+                  item.station ||
+                  index
+                }
               >
 
                 <div className="timeline-dot">
 
-                  {item.status === "completed"
+                  {item.status === "past" ||
+                  item.status === "completed"
                     ? "✓"
                     : item.status === "current"
                     ? "●"
@@ -389,7 +579,12 @@ function App() {
                   </strong>
 
                   <span>
-                    {item.information}
+
+                    {item.information ||
+                      item.actual ||
+                      item.eta ||
+                      "Scheduled"}
+
                   </span>
 
                 </div>
@@ -402,7 +597,8 @@ function App() {
 
         </section>
 
-        {/* Passenger Updates */}
+        {/* PASSENGER UPDATES */}
+
         <section className="passenger-section">
 
           <div className="card-label">
@@ -415,46 +611,77 @@ function App() {
 
           <div className="passenger-reports">
 
-            {mockTrainData.passengerReports.map((report) => (
+            {reports.length === 0 ? (
 
-              <div
-                className="passenger-report"
-                key={report.title}
-              >
+              <p>
+                No passenger reports yet.
+              </p>
 
-                <div className="report-icon">
-                  {report.icon}
-                </div>
+            ) : (
 
-                <div className="report-content">
+              reports.map(
+                (report, index) => (
 
-                  <strong>
-                    {report.title}
-                  </strong>
+                  <div
+                    className="passenger-report"
+                    key={
+                      report.title ||
+                      report.description ||
+                      index
+                    }
+                  >
 
-                  <p>
-                    {report.description}
-                  </p>
+                    <div className="report-icon">
+                      {report.icon || "🚆"}
+                    </div>
 
-                  <span>
-                    {report.reports} reports
-                    {" · "}
-                    {report.confidence} confidence
-                    {" · "}
-                    {report.time}
-                  </span>
+                    <div className="report-content">
 
-                </div>
+                      <strong>
+                        {report.title ||
+                          report.type ||
+                          "Passenger Report"}
+                      </strong>
 
-              </div>
+                      <p>
+                        {report.description ||
+                          `Report near ${
+                            report.location ||
+                            "current location"
+                          }`}
+                      </p>
 
-            ))}
+                      <span>
+
+                        {report.reports ??
+                          report.report_count ??
+                          1}{" "}
+                        reports
+                        {" · "}
+                        {report.confidence ||
+                          "Low"}{" "}
+                        confidence
+                        {" · "}
+                        {report.time ||
+                          "Recently"}
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                )
+              )
+
+            )}
 
           </div>
 
         </section>
 
-        {/* What-if Simulation */}
+        {/* WHAT IF */}
+
         <section className="what-if-section">
 
           <div className="card-label">
@@ -481,9 +708,12 @@ function App() {
               <select
                 value={additionalDelay}
                 onChange={(event) =>
-                  setAdditionalDelay(event.target.value)
+                  setAdditionalDelay(
+                    event.target.value
+                  )
                 }
               >
+
                 <option value="0">
                   No additional delay
                 </option>
@@ -499,6 +729,7 @@ function App() {
                 <option value="20">
                   +20 minutes
                 </option>
+
               </select>
 
             </div>
@@ -512,7 +743,9 @@ function App() {
               <select
                 value={congestion}
                 onChange={(event) =>
-                  setCongestion(event.target.value)
+                  setCongestion(
+                    event.target.value
+                  )
                 }
               >
 
@@ -541,12 +774,16 @@ function App() {
             Run Simulation
           </button>
 
-          {/* Simulation Result */}
+          {/* SIMULATION RESULT */}
+
           {simulation && (
+
             <div className="simulation-result">
 
               <div className="simulation-result-header">
+
                 <div>
+
                   <div className="card-label">
                     SIMULATION RESULT
                   </div>
@@ -554,11 +791,13 @@ function App() {
                   <h3>
                     Scenario Prediction
                   </h3>
+
                 </div>
 
                 <span className="simulation-badge">
                   SIMULATED
                 </span>
+
               </div>
 
               <div className="simulation-result-grid">
@@ -606,15 +845,26 @@ function App() {
               </div>
 
               <p className="simulation-explanation">
+
                 Under this scenario, the predicted arrival
-                changes to <strong>{simulation.eta}</strong>{" "}
+                changes to{" "}
+                <strong>
+                  {simulation.eta}
+                </strong>{" "}
                 with an estimated delay of{" "}
-                <strong>+{simulation.delay} minutes</strong>.
-                The calculated delay risk is{" "}
-                <strong>{simulation.risk}%</strong>.
+                <strong>
+                  +{simulation.delay} minutes
+                </strong>
+                . The calculated delay risk is{" "}
+                <strong>
+                  {simulation.risk}%
+                </strong>
+                .
+
               </p>
 
             </div>
+
           )}
 
         </section>
