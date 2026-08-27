@@ -1,4 +1,26 @@
-venv/
+# Python
 __pycache__/
 *.pyc
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment files
 .env
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Trained ML models
+*.joblib
+*.pkl
+
+# Temporary files
+*.tmp
