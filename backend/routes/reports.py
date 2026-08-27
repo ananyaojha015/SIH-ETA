@@ -1,16 +1,24 @@
 from fastapi import APIRouter
 from models import ReportCreate, ReportResponse
+from services.crowd_service import evaluate_reports
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 fake_reports_db = []
+
 
 @router.post("/", response_model=ReportResponse)
 def create_report(report: ReportCreate):
     fake_reports_db.append(report.dict())
     return {"message": "Report received", "total_reports": len(fake_reports_db)}
 
+
 @router.get("/{train_id}")
 def get_reports(train_id: str):
     matching = [r for r in fake_reports_db if r.get("train_id") == train_id]
-    return {"train_id": train_id, "reports": matching}
+    verification = evaluate_reports(train_id, fake_reports_db)
+    return {
+        "train_id": train_id,
+        "reports": matching,
+        "verification": verification,
+    }

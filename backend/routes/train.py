@@ -1,28 +1,44 @@
 from fastapi import APIRouter
 from models import TrainStatus, ETAResponse, TimelineResponse
+from services.ml_service import get_eta_prediction
+from services.simulation_service import get_current_state, get_ml_inputs, trigger_event
 
 router = APIRouter(prefix="/train", tags=["train"])
 
+
 @router.get("/{train_id}", response_model=TrainStatus)
 def get_train(train_id: str):
+    state = get_current_state(train_id)
     return {
-        "train_id": train_id,
-        "current_station": "Station B",
-        "next_station": "Station C",
-        "delay_min": 9,
-        "status": "running"
+        "train_id": state["train_id"],
+        "current_station": state["position"],
+        "next_station": state["next_station"] or "N/A",
+        "delay_min": state["delay"],
+        "status": state["status"],
     }
+
 
 @router.get("/{train_id}/eta", response_model=ETAResponse)
 def get_eta(train_id: str):
+    ml_inputs = get_ml_inputs(train_id)
+    prediction = get_eta_prediction(**ml_inputs)
+
     return {
         "train_id": train_id,
-        "eta": "18:47",
-        "eta_min": "18:44",
-        "eta_max": "18:51",
-        "confidence": 91,
-        "delay_risk": 68
+        "eta": prediction["eta"],
+        "eta_min": prediction["eta_min"],
+        "eta_max": prediction["eta_max"],
+        "confidence": prediction["confidence"],
+        "delay_risk": prediction["delay_risk"],
     }
+
+
+@router.post("/{train_id}/event/{event_type}")
+def trigger_train_event(train_id: str, event_type: str):
+    """Demo/what-if trigger: NORMAL, DELAY, CONGESTION, STOPPAGE, STATION_DWELL"""
+    new_state = trigger_event(train_id, event_type.upper())
+    return {"message": f"Event {event_type} applied", "new_state": new_state}
+
 
 @router.get("/{train_id}/timeline", response_model=TimelineResponse)
 def get_timeline(train_id: str):
