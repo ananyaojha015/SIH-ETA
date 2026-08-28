@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import mockTrainData from "./data/mockTrainData";
 
@@ -11,59 +12,59 @@ import {
 
 import "./App.css";
 
+const REPORT_TYPES = [
+  "train_stopped",
+  "moving_slowly",
+  "heavy_crowd",
+  "platform_changed",
+  "weather_issue",
+  "announcement",
+  "accident",
+  "medical_emergency",
+  "fire_smoke",
+  "security_concern",
+  "track_obstruction",
+];
+
+const formatBreakdownName = (key) => {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
 function App() {
-  const [trainData, setTrainData] =
-    useState(mockTrainData);
+  const [trainData, setTrainData] = useState(mockTrainData);
+  const [etaData, setEtaData] = useState(null);
+  const [timelineData, setTimelineData] = useState(null);
+  const [reportsData, setReportsData] = useState(null);
 
-  const [etaData, setEtaData] =
-    useState(null);
+  const [backendConnected, setBackendConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [timelineData, setTimelineData] =
-    useState(null);
+  const [congestionLoading, setCongestionLoading] = useState(false);
+  const [congestionMessage, setCongestionMessage] = useState("");
 
-  const [reportsData, setReportsData] =
-    useState(null);
+  const [additionalDelay, setAdditionalDelay] = useState("0");
+  const [congestion, setCongestion] = useState("medium");
+  const [simulation, setSimulation] = useState(null);
 
-  const [backendConnected, setBackendConnected] =
-    useState(false);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [congestionLoading, setCongestionLoading] =
-    useState(false);
-
-  const [congestionMessage, setCongestionMessage] =
-    useState("");
-
-  const [additionalDelay, setAdditionalDelay] =
-    useState("0");
-
-  const [congestion, setCongestion] =
-    useState("medium");
-
-  const [simulation, setSimulation] =
-    useState(null);
+  const [reportType, setReportType] = useState("train_stopped");
 
   const TRAIN_ID = "12876";
 
   /* =========================
      LOAD BACKEND DATA
-     ========================= */
+  ========================= */
 
   const loadBackendData = async () => {
     try {
-      const [
-        train,
-        eta,
-        timeline,
-        reports,
-      ] = await Promise.all([
-        getTrain(TRAIN_ID),
-        getETA(TRAIN_ID),
-        getTimeline(TRAIN_ID),
-        getReports(TRAIN_ID),
-      ]);
+      const [train, eta, timeline, reports] =
+        await Promise.all([
+          getTrain(TRAIN_ID),
+          getETA(TRAIN_ID),
+          getTimeline(TRAIN_ID),
+          getReports(TRAIN_ID),
+        ]);
 
       setTrainData(train);
       setEtaData(eta);
@@ -73,10 +74,7 @@ function App() {
       setBackendConnected(true);
       setLoading(false);
     } catch (error) {
-      console.error(
-        "Backend connection failed:",
-        error
-      );
+      console.error("Backend connection failed:", error);
 
       setBackendConnected(false);
       setLoading(false);
@@ -85,7 +83,7 @@ function App() {
 
   /* =========================
      INITIAL LOAD + POLLING
-     ========================= */
+  ========================= */
 
   useEffect(() => {
     loadBackendData();
@@ -99,7 +97,7 @@ function App() {
 
   /* =========================
      REAL BACKEND CONGESTION
-     ========================= */
+  ========================= */
 
   const triggerCongestion = async () => {
     console.log(
@@ -111,28 +109,18 @@ function App() {
     setCongestionMessage("");
 
     try {
-      /*
-       * REAL BACKEND EVENT
-       */
-      const eventResponse =
-        await triggerTrainEvent(
-          TRAIN_ID,
-          "CONGESTION"
-        );
+      const eventResponse = await triggerTrainEvent(
+        TRAIN_ID,
+        "CONGESTION"
+      );
 
       console.log(
         "✅ Congestion event response:",
         eventResponse
       );
 
-      /*
-       * Fetch updated backend state
-       */
-      const updatedTrain =
-        await getTrain(TRAIN_ID);
-
-      const updatedETA =
-        await getETA(TRAIN_ID);
+      const updatedTrain = await getTrain(TRAIN_ID);
+      const updatedETA = await getETA(TRAIN_ID);
 
       setTrainData(updatedTrain);
       setEtaData(updatedETA);
@@ -143,9 +131,6 @@ function App() {
         "✓ Congestion applied — ETA updated"
       );
 
-      /*
-       * Refresh other dashboard data
-       */
       try {
         const updatedTimeline =
           await getTimeline(TRAIN_ID);
@@ -161,7 +146,6 @@ function App() {
           refreshError
         );
       }
-
     } catch (error) {
       console.error(
         "❌ Congestion trigger failed:",
@@ -173,7 +157,6 @@ function App() {
       );
 
       setBackendConnected(false);
-
     } finally {
       setCongestionLoading(false);
     }
@@ -181,7 +164,7 @@ function App() {
 
   /* =========================
      WHAT-IF SIMULATION
-     ========================= */
+  ========================= */
 
   const runSimulation = () => {
     const delay = Number(additionalDelay);
@@ -200,14 +183,11 @@ function App() {
 
     const baseDelay =
       etaData?.delay_risk !== undefined
-        ? Math.round(
-            etaData.delay_risk / 10
-          )
+        ? Math.round(etaData.delay_risk / 10)
         : mockTrainData.delay;
 
     const totalAdditionalDelay =
-      delay +
-      congestionImpact[congestion];
+      delay + congestionImpact[congestion];
 
     const simulatedDelay = Math.max(
       0,
@@ -215,27 +195,19 @@ function App() {
     );
 
     const baseEta =
-      etaData?.eta ||
-      mockTrainData.eta;
+      etaData?.eta || mockTrainData.eta;
 
-    const [
-      hours,
-      minutes,
-    ] = baseEta
+    const [hours, minutes] = baseEta
       .split(":")
       .map(Number);
 
-    const baseMinutes =
-      hours * 60 + minutes;
+    const baseMinutes = hours * 60 + minutes;
 
     const simulatedMinutes =
-      baseMinutes +
-      totalAdditionalDelay;
+      baseMinutes + totalAdditionalDelay;
 
     const finalHours =
-      Math.floor(
-        simulatedMinutes / 60
-      ) % 24;
+      Math.floor(simulatedMinutes / 60) % 24;
 
     const finalMinutes =
       simulatedMinutes % 60;
@@ -246,23 +218,21 @@ function App() {
         "0"
       )}:${String(finalMinutes).padStart(
         2,
-        "0"
-      )}`;
+        "0")}`;
 
     const baseRisk =
       etaData?.delay_risk ??
       mockTrainData.delayRisk;
 
-    const simulatedRisk =
-      Math.min(
-        99,
-        Math.max(
-          5,
-          baseRisk +
-            delay * 1.5 +
-            congestionRisk[congestion]
-        )
-      );
+    const simulatedRisk = Math.min(
+      99,
+      Math.max(
+        5,
+        baseRisk +
+          delay * 1.5 +
+          congestionRisk[congestion]
+      )
+    );
 
     let riskStatus = "Low Risk";
 
@@ -274,19 +244,15 @@ function App() {
 
     setSimulation({
       eta: simulatedEta,
-      delay: Math.round(
-        simulatedDelay
-      ),
-      risk: Math.round(
-        simulatedRisk
-      ),
+      delay: Math.round(simulatedDelay),
+      risk: Math.round(simulatedRisk),
       riskStatus,
     });
   };
 
   /* =========================
      NORMALIZED DATA
-     ========================= */
+  ========================= */
 
   const currentStation =
     trainData?.current_station ||
@@ -342,6 +308,20 @@ function App() {
   const verification =
     reportsData?.verification ||
     null;
+
+  /* =========================
+     DYNAMIC ETA BREAKDOWN
+  ========================= */
+
+  const breakdown =
+    etaData?.breakdown || {};
+
+  const breakdownFactors = Object.entries(
+    breakdown
+  ).filter(
+    ([, percentage]) =>
+      Number(percentage) > 0
+  );
 
   return (
     <div className="dashboard">
@@ -529,7 +509,7 @@ function App() {
 
           </div>
 
-          {/* ETA */}
+          {/* ETA CARD */}
 
           <div className="eta-card">
 
@@ -630,51 +610,66 @@ function App() {
           </h2>
 
           <p className="explanation">
-            The predicted arrival time
-            is calculated using current
-            train conditions, operational
-            delay, congestion and journey
-            information near{" "}
-            {currentStation}.
+            The predicted arrival time is
+            influenced by the current
+            operational conditions and
+            live railway data.
           </p>
 
           <div className="factor-list">
 
-            {mockTrainData.etaFactors.map(
-              (factor) => (
+            {breakdownFactors.length > 0 ? (
 
-                <div
-                  className="factor"
-                  key={factor.name}
-                >
+              breakdownFactors.map(
+                ([key, percentage]) => (
 
-                  <div className="factor-header">
+                  <div
+                    className="factor"
+                    key={key}
+                  >
 
-                    <span>
-                      {factor.name}
-                    </span>
+                    <div className="factor-header">
 
-                    <strong>
-                      {factor.percentage}%
-                    </strong>
+                      <span>
+                        {formatBreakdownName(
+                          key
+                        )}
+                      </span>
+
+                      <strong>
+                        {percentage}%
+                      </strong>
+
+                    </div>
+
+                    <div className="factor-bar">
+
+                      <div
+                        className="factor-fill"
+                        style={{
+                          width:
+                            `${percentage}%`,
+                        }}
+                      ></div>
+
+                    </div>
 
                   </div>
 
-                  <div className="factor-bar">
-
-                    <div
-                      className="factor-fill"
-                      style={{
-                        width:
-                          `${factor.percentage}%`,
-                      }}
-                    ></div>
-
-                  </div>
-
-                </div>
-
+                )
               )
+
+            ) : (
+
+              <p
+                style={{
+                  opacity: 0.7,
+                  fontSize: "14px",
+                }}
+              >
+                No ETA breakdown available yet.
+              </p>
+
             )}
 
           </div>
@@ -759,6 +754,8 @@ function App() {
             👥 Passenger Updates
           </h2>
 
+          {/* ONE COMBINED VERIFICATION SUMMARY */}
+
           {verification && (
             <div className="crowd-verification">
 
@@ -771,9 +768,8 @@ function App() {
                   </span>
 
                   <strong>
-                    {
-                      verification.report_count
-                    }{" "}
+                    {verification.report_count ??
+                      reports.length}{" "}
                     matching reports
                   </strong>
 
@@ -785,9 +781,8 @@ function App() {
                       ?.toLowerCase()
                   }`}
                 >
-                  {
-                    verification.confidence
-                  }{" "}
+                  {verification.confidence ||
+                    "Low"}{" "}
                   Confidence
                 </span>
 
@@ -800,6 +795,60 @@ function App() {
 
             </div>
           )}
+
+          {/* REPORT TYPE */}
+
+          <div
+            style={{
+              marginTop: "18px",
+              marginBottom: "18px",
+            }}
+          >
+
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: 600,
+              }}
+            >
+              Report Type
+            </label>
+
+            <select
+              value={reportType}
+              onChange={(event) =>
+                setReportType(
+                  event.target.value
+                )
+              }
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: "1px solid rgba(128,128,128,0.3)",
+                background: "inherit",
+              }}
+            >
+
+              {REPORT_TYPES.map(
+                (type) => (
+
+                  <option
+                    value={type}
+                    key={type}
+                  >
+                    {formatBreakdownName(type)}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
+
+          {/* INDIVIDUAL REPORTS */}
 
           <div className="passenger-reports">
 
@@ -832,8 +881,10 @@ function App() {
 
                       <strong>
                         {report.title ||
-                          report.type ||
-                          "Passenger Report"}
+                          formatBreakdownName(
+                            report.type ||
+                              "passenger_report"
+                          )}
                       </strong>
 
                       <p>
@@ -957,12 +1008,8 @@ function App() {
 
           <button
             className="simulate-button"
-            onClick={
-              triggerCongestion
-            }
-            disabled={
-              congestionLoading
-            }
+            onClick={triggerCongestion}
+            disabled={congestionLoading}
           >
             {congestionLoading
               ? "⏳ Updating ETA..."
@@ -985,9 +1032,7 @@ function App() {
 
           <button
             className="simulate-button"
-            onClick={
-              runSimulation
-            }
+            onClick={runSimulation}
             style={{
               marginTop: "12px",
               opacity: 0.85,
@@ -1106,3 +1151,4 @@ function App() {
 }
 
 export default App;
+
