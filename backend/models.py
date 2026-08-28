@@ -1,5 +1,20 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
+from enum import Enum
+
+
+class ReportType(str, Enum):
+    train_stopped = "train_stopped"
+    moving_slowly = "moving_slowly"
+    heavy_crowd = "heavy_crowd"
+    platform_changed = "platform_changed"
+    weather_issue = "weather_issue"
+    announcement = "announcement"
+    accident = "accident"
+    medical_emergency = "medical_emergency"
+    fire_smoke = "fire_smoke"
+    security_concern = "security_concern"
+    track_obstruction = "track_obstruction"
 
 
 class ETAResponse(BaseModel):
@@ -9,6 +24,7 @@ class ETAResponse(BaseModel):
     eta_max: str
     confidence: int
     delay_risk: int
+    breakdown: Dict[str, int]
 
 
 class TrainStatus(BaseModel):
@@ -34,7 +50,7 @@ class TimelineResponse(BaseModel):
 
 class ReportCreate(BaseModel):
     train_id: str
-    type: str
+    type: ReportType
     location: str
     description: Optional[str] = None
 
