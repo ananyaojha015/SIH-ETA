@@ -2,6 +2,9 @@ from fastapi import APIRouter
 from models import TrainStatus, ETAResponse, TimelineResponse
 from services.ml_service import get_eta_prediction
 from services.simulation_service import get_current_state, get_ml_inputs, trigger_event
+from services.reports_store import get_reports_for_train
+from services.crowd_service import evaluate_reports
+from services.explain_service import get_eta_breakdown
 
 router = APIRouter(prefix="/train", tags=["train"])
 
@@ -23,6 +26,23 @@ def get_eta(train_id: str):
     ml_inputs = get_ml_inputs(train_id)
     prediction = get_eta_prediction(**ml_inputs)
 
+    train_reports = get_reports_for_train(train_id)
+    crowd_confidence = None
+    crowd_report_count = 0
+    if train_reports:
+        verification = evaluate_reports(train_id, train_reports)
+        crowd_confidence = verification.get("confidence")
+        crowd_report_count = verification.get("report_count", 0)
+
+    breakdown = get_eta_breakdown(
+        speed=ml_inputs["speed"],
+        delay=ml_inputs["delay"],
+        dwell_time=ml_inputs["dwell_time"],
+        congestion=ml_inputs["congestion"],
+        crowd_confidence=crowd_confidence,
+        crowd_report_count=crowd_report_count,
+    )
+
     return {
         "train_id": train_id,
         "eta": prediction["eta"],
@@ -30,6 +50,7 @@ def get_eta(train_id: str):
         "eta_max": prediction["eta_max"],
         "confidence": prediction["confidence"],
         "delay_risk": prediction["delay_risk"],
+        "breakdown": breakdown,
     }
 
 

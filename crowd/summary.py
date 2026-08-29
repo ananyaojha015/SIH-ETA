@@ -6,7 +6,13 @@ def generate_summary(result):
         "heavy_crowd": "heavy crowding",
         "platform_changed": "a platform change",
         "weather_issue": "a weather-related issue",
-        "announcement": "an announcement"
+        "announcement": "an announcement",
+        "accident": "an accident",
+        "medical_emergency": "a medical emergency",
+        "fire_smoke": "a fire or smoke incident",
+        "security_concern": "a security concern",
+        "track_obstruction": "a track obstruction"
+
     }
 
     event = event_names.get(
